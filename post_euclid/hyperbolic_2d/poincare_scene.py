@@ -58,30 +58,29 @@ class PoincareScene:
         self._points: typing.Dict[str, PoincarePoint] = {}
         self._scene_items: typing.List[PoincareSceneItem] = []
 
+        self._transformation_matrix = numpy.matrix([
+            [1, 0],
+            [0, 1]
+        ], dtype=complex)
+
     def translate(self, dx: float, dy: float):
-        a = dx + dy * 1j
+        b = dx + dy * 1j
 
-        for k in self._points.keys():
-            z = self._points[k].x + self._points[k].y * 1j
+        mat = numpy.matrix([
+            [1, b],
+            [numpy.conjugate(b), 1]
+        ], dtype=complex)
 
-            p_new = (a + z) / (1 + numpy.conjugate(a) * z)
-
-            self._points[k] = PoincarePoint(
-                numpy.real(p_new),
-                numpy.imag(p_new))
+        self._transformation_matrix = mat * self._transformation_matrix
 
     def rotate(self, angle: float):
-        a = numpy.cos(angle) + numpy.sin(angle) * 1j
 
-        for k in self._points.keys():
-            z = self._points[k].x + self._points[k].y * 1j
+        mat = numpy.matrix([
+            [numpy.cos(angle) + numpy.sin(angle) * 1j, 0],
+            [0, 1]
+        ], dtype=complex)
 
-            z = a * z
-
-            self._points[k] = PoincarePoint(
-                numpy.real(z),
-                numpy.imag(z)
-            )
+        self._transformation_matrix = mat * self._transformation_matrix
 
     def add_scene_item(self, poincare_scene_item: PoincareSceneItem):
         if any(k not in self._points for k in poincare_scene_item.keys):
@@ -98,7 +97,16 @@ class PoincareScene:
         return key
 
     def point_value(self, key: str) -> PoincarePoint:
-        return self._points[key]
+        z = self._points[key].x + self._points[key].y * 1j
+
+        num = (self._transformation_matrix[0, 0] * z + self._transformation_matrix[0, 1])
+        denom = (self._transformation_matrix[1, 0] * z + self._transformation_matrix[1, 1])
+
+        p_new = num / denom
+
+        return PoincarePoint(
+            numpy.real(p_new),
+            numpy.imag(p_new))
 
     @staticmethod
     def translation_mobius(dx: float) -> typing.Tuple[float, float, float, float]:
