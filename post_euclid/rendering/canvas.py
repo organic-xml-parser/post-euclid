@@ -78,7 +78,7 @@ class Canvas:
                           start_angle=a0,
                           angle=delta_angle,
                           closed=False,
-                          segments=8)
+                          segments=3)
 
     def draw_line_segment(self, line_segment: euclidean_2d.entities.LineSegment, *args, **kwargs):
         return pyglet.shapes.Line(

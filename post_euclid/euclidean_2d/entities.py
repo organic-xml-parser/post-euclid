@@ -16,11 +16,33 @@ class Point(Euclidean2D):
     y: float
 
     @property
+    def normalized(self) -> Point:
+        if self.is_origin:
+            raise ValueError("Cannot normalize origin point")
+
+        mag = self.mag
+        return Point(self.x / mag, self.y / mag)
+
+    @property
+    def mag(self):
+        return numpy.hypot(self.x, self.y)
+
+    @property
+    def mag_sq(self):
+        return self.x * self.x + self.y * self.y
+
+    @property
     def is_origin(self):
         return self.x == 0 and self.y == 0
 
     def cross(self, other: Point) -> float:
         return self.x * other.y - self.y * other.x
+
+    def dot(self, other: Point) -> float:
+        return self.x * other.x + self.y * other.y
+
+    def scaled(self, amount: float):
+        return Point(self.x * amount, self.y * amount)
 
     def __add__(self, other):
         return Point(self.x + other.x, self.y + other.y)
@@ -52,6 +74,10 @@ class Circle(Euclidean2D):
     @property
     def arc(self) -> CircleArc:
         return CircleArc(self, 0, 2 * numpy.pi)
+
+    @staticmethod
+    def unit_circle():
+        return Circle(Point(0, 0), 1)
 
 
 @dataclass
@@ -108,6 +134,11 @@ class Line(Euclidean2D):
 
         self.origin = origin
         self.delta = Point(delta.x / delta_mag, delta.y / delta_mag)
+
+    def closest_point(self, point: Point):
+        dp = point - self.origin
+        dist = dp.dot(point)
+        return self.origin + self.delta.scale(dist)
 
     @property
     def reversed(self):

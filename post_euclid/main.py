@@ -3,43 +3,22 @@ from pyglet.window.key import MOTION_LEFT, MOTION_RIGHT, MOTION_UP, MOTION_DOWN
 
 from post_euclid import euclidean_2d
 from post_euclid.euclidean_2d import entities
+from post_euclid.hyperbolic_2d.poincare_tiling import PoincareTiling
 from post_euclid.rendering.canvas import Canvas
 from post_euclid.hyperbolic_2d.coordinate import Axial
 from post_euclid.hyperbolic_2d.poincare_scene import PoincareScene, PoincareSceneLineSegment, PoincareScenePoint
 
 
 def main():
+
+    scene = PoincareScene()
+
+    PoincareTiling(5, 4, radius=0.3).generate(scene, 4)
+
     window = pyglet.window.Window(
         caption="PostEuclid",
         width=800,
         height=800)
-
-    scene = PoincareScene()
-    points = []
-    pt_count = 5
-    for x in range(-pt_count, pt_count + 1):
-        points.append([])
-        for y in range(-pt_count, pt_count + 1):
-            try:
-                pt = Axial(x / pt_count, y / pt_count).as_hyperbolic_beltrami().as_hyperbolic_poincare()
-                points[-1].append(scene.create_point_reference(pt.x, pt.y))
-            except:
-                pass
-
-    for i in range(0, len(points)):
-        for j in range(0, len(points[i]) - 1):
-            p0 = points[i][j]
-            p1 = points[i][j + 1]
-
-            #if i == 2 and j == 5:
-            scene.add_scene_item(PoincareSceneLineSegment(p0, p1))
-
-            if i < len(points) - 1 and len(points[i + 1]) > j:
-                scene.add_scene_item(PoincareSceneLineSegment(p0, points[i + 1][j]))
-
-    for pp in points:
-        for p in pp:
-            scene.add_scene_item(PoincareScenePoint(p))
 
     @window.event
     def on_text_motion(motion):
@@ -55,6 +34,14 @@ def main():
 
         if motion == MOTION_DOWN:
             scene.translate(0, -step)
+
+    @window.event
+    def on_key_press(key, modifier):
+        if key == pyglet.window.key.SPACE:
+            points.append(scene.create_point_reference(0, 0))
+
+            scene.add_scene_item(PoincareSceneLineSegment(points[-2], points[-1]))
+
 
     canvas = Canvas(window)
 

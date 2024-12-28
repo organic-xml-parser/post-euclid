@@ -48,6 +48,12 @@ class PoincareLineSegment(Poincare):
             circle_arc=euclidean_2d.entities.LineSegment(self.p0, self.p1),
             extra_entities=[])
 
+    def reflect_point(self, point: PoincarePoint):
+        # point is inversion about circle arc
+        circle_arc = self.get_circle_arc()
+
+        CircleInversion.invert(point, circle_arc.circle_arc)
+
     def get_circle_arc(self) -> CircleArcConstruction:
         # arc through p0, p1, and tangent to unit circle
         # returned is the radius and midpoint of the circle

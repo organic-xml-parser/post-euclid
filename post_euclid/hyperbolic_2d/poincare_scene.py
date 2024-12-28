@@ -74,7 +74,6 @@ class PoincareScene:
         self._transformation_matrix = mat * self._transformation_matrix
 
     def rotate(self, angle: float):
-
         mat = numpy.matrix([
             [numpy.cos(angle) + numpy.sin(angle) * 1j, 0],
             [0, 1]
@@ -93,20 +92,41 @@ class PoincareScene:
 
     def create_point_reference(self, x: float, y: float) -> str:
         key = str(uuid.uuid4())
+        x, y = PoincareScene._apply_transform_matrix(numpy.linalg.inv(self._transformation_matrix), (x, y))
+
         self._points[key] = PoincarePoint(x, y)
         return key
 
     def point_value(self, key: str) -> PoincarePoint:
-        z = self._points[key].x + self._points[key].y * 1j
+        x, y = PoincareScene._apply_transform_matrix(self._transformation_matrix, self._points[key].xy)
 
-        num = (self._transformation_matrix[0, 0] * z + self._transformation_matrix[0, 1])
-        denom = (self._transformation_matrix[1, 0] * z + self._transformation_matrix[1, 1])
+        return PoincarePoint(x, y)
+
+    def transformed_coordinate(self, x, y) -> typing.Tuple[float, float]:
+        return PoincareScene._apply_transform_matrix(self._transformation_matrix, (x, y))
+
+    def underlying_coordinate(self, x, y) -> typing.Tuple[float, float]:
+        return PoincareScene._apply_transform_matrix(
+            numpy.linalg.inv(self._transformation_matrix),
+            (x, y))
+
+    def underlying_point_coordinates(self, key: str) -> PoincarePoint:
+        """
+        :return: the point coordinate as stored, with no transform applied to it
+        """
+
+        return self._points[key]
+
+    @staticmethod
+    def _apply_transform_matrix(transform_matrix, xy) -> typing.Tuple[float, float]:
+        z = xy[0] + xy[1] * 1j
+
+        num = (transform_matrix[0, 0] * z + transform_matrix[0, 1])
+        denom = (transform_matrix[1, 0] * z + transform_matrix[1, 1])
 
         p_new = num / denom
 
-        return PoincarePoint(
-            numpy.real(p_new),
-            numpy.imag(p_new))
+        return numpy.real(p_new), numpy.imag(p_new)
 
     @staticmethod
     def translation_mobius(dx: float) -> typing.Tuple[float, float, float, float]:
