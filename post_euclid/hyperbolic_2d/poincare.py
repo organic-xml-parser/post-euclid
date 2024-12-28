@@ -24,8 +24,8 @@ class PoincarePoint(euclidean_2d.entities.Point, Poincare):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        #if numpy.hypot(self.x, self.y) > 1:
-        #    raise ValueError("Invalid transformation")
+        if numpy.hypot(self.x, self.y) > 1:
+            raise ValueError("Invalid transformation")
 
     @property
     def xy(self):
@@ -85,7 +85,7 @@ class PoincareLineSegment(Poincare):
         ox = (qy * u - py * v) / denom
         oy = (-qx * u + px * v) / denom
 
-        origin = PoincarePoint(ox, oy)
+        origin = euclidean_2d.entities.Point(ox, oy)
         radius = math.sqrt(ox * ox + oy * oy - 1)
 
         # calculate the angle between the two points:
