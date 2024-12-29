@@ -14,14 +14,14 @@ class HyperbolicModelTransformTool(Generic[T]):
     def create_identity(self) -> T:
         raise NotImplementedError()
 
-    def create_translation_like(self, params: typing.Any) -> T:
+    def create_translation_like(self, dx: float, dy: float) -> T:
         """
         Generate a translation transform according to the supplied parameters.
         The exact parameter values are implementation-dependent
         """
         raise NotImplementedError()
 
-    def create_rotation_like(self, params: typing.Any) -> T:
+    def create_rotation_like(self, angle: float) -> T:
         """
         As w. create_translation_like, produce a Transform analogous to a rotation.
         """
@@ -41,15 +41,11 @@ class HyperbolicModelTransformTool(Generic[T]):
         raise NotImplementedError()
 
 
+T_Point = TypeVar("T_Point")
+T_Line = TypeVar("T_Line")
+
+
 class HyperbolicModelEntity(Generic[T]):
-    """
-    Base class for all model systems.
-    """
-    def get_transform_tool(self) -> HyperbolicModelTransformTool[T]:
-        """
-        :return: this system's utility class for managing and composing mobius transforms (gyrovector operations)
-        """
-        pass
 
     def get_euclidean_representation(self) -> Euclidean2D:
         """
@@ -59,9 +55,35 @@ class HyperbolicModelEntity(Generic[T]):
 
         raise NotImplementedError()
 
-    def apply_transform(self, model_transfrom: T) -> HyperbolicModelEntity[T]:
+    def apply_transform(self, model_transfrom: T):
         """
-        :return: a copy of the entity with the specified transform applied.
+        Apply the transform to the underlying representation.
         """
         raise NotImplementedError()
 
+
+class HyperbolicModelEntityFactory(Generic[T, T_Point, T_Line]):
+
+    def create_point(self) -> T_Point:
+        raise NotImplementedError()
+
+    def create_line_segment(self, p0: T_Point, p1: T_Point) -> T_Line:
+        raise NotImplementedError()
+
+
+class HyperbolicModel(Generic[T, T_Point, T_Line]):
+    """
+    Base class for all model systems.
+    """
+
+    def get_transform_tool(self) -> HyperbolicModelTransformTool[T]:
+        """
+        :return: this system's utility class for managing and composing mobius transforms (gyrovector operations)
+        """
+        raise NotImplementedError()
+
+    def get_factory(self) -> HyperbolicModelEntityFactory[T]:
+        """
+        :return: this system's utility class for creating new entities
+        """
+        raise NotImplementedError()

@@ -42,12 +42,12 @@ class Canvas:
             # draw vertical line
             line_bottom = self._to_render_coords(line.origin.x, y1)
             line_top = self._to_render_coords(line.origin.x, -y0)
-            pyglet.shapes.Line(*line_bottom, *line_top, *args, **kwargs).draw()
+            pyglet.shapes.Line(*line_bottom, *line_top, *args, **kwargs)
         elif line.delta.y == 0:
             # draw horizontal line
             line_left = self._to_render_coords(x0, line.origin.y)
             line_right = self._to_render_coords(x1, line.origin.y)
-            pyglet.shapes.Line(*line_left, *line_right, *args, **kwargs).draw()
+            pyglet.shapes.Line(*line_left, *line_right, *args, **kwargs)
         else:
             dy_dx = line.delta.y / line.delta.x
             dx0 = x0 - line.origin.x
@@ -70,15 +70,20 @@ class Canvas:
 
         a0 = circle_arc.angle_0
         delta_angle = circle_arc.angle_1 - circle_arc.angle_0
+        radius = circle_arc.circle.radius * self.scale
+        arc_length = delta_angle * radius
+
+        segments = int(max(3.0, arc_length / 5))
+        segments = int(max(float(segments), 4.0 * delta_angle / math.pi))
 
         return pyglet.shapes.Arc(*self._to_render_coords(*circle_arc.circle.center),
-                          circle_arc.circle.radius * self.scale,
+                          radius=radius,
                           *args,
                           **kwargs,
                           start_angle=a0,
                           angle=delta_angle,
                           closed=False,
-                          segments=3)
+                          segments=segments)
 
     def draw_line_segment(self, line_segment: euclidean_2d.entities.LineSegment, *args, **kwargs):
         return pyglet.shapes.Line(

@@ -10,8 +10,8 @@ from post_euclid import euclidean_2d
 from post_euclid.euclidean_2d import entities
 from post_euclid.euclidean_2d.entities import normalize_angle, Euclidean2D
 from post_euclid.euclidean_2d.circle_inversion import CircleInversion
-from post_euclid.hyperbolic_2d.hyperbolic_model_entity import HyperbolicModelEntity, HyperbolicModelTransformTool, T
-
+from post_euclid.hyperbolic_2d.hyperbolic_model_entity import HyperbolicModelEntity, HyperbolicModelTransformTool, T, \
+    HyperbolicModelEntityFactory, HyperbolicModel, T_Point, T_Line
 
 T_Transform = typing.Tuple[complex, complex, complex, complex]
 
@@ -22,8 +22,8 @@ class PoincareModelTransformTool(HyperbolicModelTransformTool[T_Transform]):
         return (1, 0,
                 0, 1)
 
-    def create_translation_like(self, params: typing.Tuple[float, float]) -> T_Transform:
-        b = complex(params[0], params[1])
+    def create_translation_like(self, dx: float, dy: float) -> T_Transform:
+        b = complex(dx, dy)
 
         return (1,                      b,
                 numpy.conjugate(b),     1)
@@ -69,8 +69,8 @@ class PoincareModelTransformTool(HyperbolicModelTransformTool[T_Transform]):
         )
 
 
-_TRANSFORM_TOOL = PoincareModelTransformTool()
 
+_TRANSFORM_TOOL = PoincareModelTransformTool()
 
 class PoincareModelEntity(HyperbolicModelEntity[T_Transform]):
 
@@ -102,6 +102,7 @@ class PoincareModelPoint(euclidean_2d.entities.Point, PoincareModelEntity):
     def apply_transform(self, model_transfrom: T_Transform):
         z = complex(self.x, self.y)
         p_new = (model_transfrom[0] * z + model_transfrom[1]) / (model_transfrom[2] * z + model_transfrom[3])
+
         self.x = p_new.real
         self.y = p_new.imag
 
@@ -123,8 +124,8 @@ class PoincareModelLineSegment(PoincareModelEntity):
         # arc through p0, p1, and tangent to unit circle
         # returned is the radius and midpoint of the circle
 
-        #if self.p0.is_origin or self.p1.is_origin:
-        #    return self._get_direct_line_segment()
+        if self.p0.is_origin or self.p1.is_origin:
+            return self._get_direct_line_segment()
 
         px = self.p0.x
         py = self.p0.y
@@ -183,3 +184,25 @@ class PoincareModelLineSegment(PoincareModelEntity):
                 angle_min,
                 angle_max
             )
+
+
+class PoincareModelEntityFactory(HyperbolicModelEntityFactory[T_Transform, PoincareModelPoint, PoincareModelLineSegment]):
+
+    def create_point(self) -> PoincareModelPoint:
+        return PoincareModelPoint(0, 0)
+
+    def create_line_segment(self, p0: PoincareModelPoint, p1: PoincareModelPoint) -> PoincareModelLineSegment:
+        return PoincareModelLineSegment(p0, p1)
+
+
+class PoincareHyperbolicModel(HyperbolicModel[T_Transform, PoincareModelPoint, PoincareModelLineSegment]):
+
+    def __init__(self):
+        self._factory = PoincareModelEntityFactory()
+        self._tool = PoincareModelTransformTool()
+
+    def get_factory(self) -> HyperbolicModelEntityFactory[T, T_Point, T_Line]:
+        return self._factory
+
+    def get_transform_tool(self) -> HyperbolicModelTransformTool[T]:
+        return self._tool
