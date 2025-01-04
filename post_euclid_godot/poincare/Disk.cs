@@ -4,6 +4,8 @@ using Complex = System.Numerics.Complex;
 using System.Collections.Generic;
 using System.Linq;
 
+namespace PostEuclid.poincare;
+
 
 public class MobiusTransform {
         
@@ -155,8 +157,10 @@ public partial class Disk : Sprite2D
     
     public override void _Ready()
     {
-        Tiling.Tiling_3_7.generate(this, 5);
+        Tiling.Tiling_3_7.Generate(this, 2);
         recomputeEdges();
+
+        GD.Print("Generated ", edges.Count, "Edges and ", points.Count, " Points");
     }
 
     private void recomputeEdges()
@@ -197,22 +201,22 @@ public partial class Disk : Sprite2D
 
         if (Input.IsActionPressed("ui_left"))
         {
-            dx -= current_step;
+            dx += current_step;
         }
         
         if (Input.IsActionPressed("ui_right"))
         {
-            dx += current_step;
+            dx -= current_step;
         }
         
         if (Input.IsActionPressed("ui_up"))
         {
-            dy -= current_step;
+            dy += current_step;
         }
         
         if (Input.IsActionPressed("ui_down"))
         {
-            dy += current_step;
+            dy -= current_step;
         }
 
         PoincareTranslate((float)dx, (float)dy);

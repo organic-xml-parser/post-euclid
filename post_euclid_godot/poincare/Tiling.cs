@@ -1,40 +1,39 @@
-using Godot;
 using System;
 using System.Collections.Generic;
-using System.Data.SqlTypes;
 using System.Linq;
-using System.Net.NetworkInformation;
 
-public class Util
+namespace PostEuclid.poincare;
+
+public static class Util
 {
     
-    public static String create_mirrored_point(Disk disk, String p, String p0, String p1)
+    public static string create_mirrored_point(Disk disk, string p, String p0, String p1)
     {
-        var original_trsf = disk.PoincareTransform;
+        var originalTrsf = disk.PoincareTransform;
         
-        var p0e = disk.GetPoint(p0);
+        var p0E = disk.GetPoint(p0);
 
-        disk.PoincareTranslate(-p0e.X, -p0e.Y);
+        disk.PoincareTranslate(-p0E.X, -p0E.Y);
 
-        var p0e_new = disk.GetPoint(p0);
-        if (p0e_new.Length() != 0)
+        var p0ENew = disk.GetPoint(p0);
+        if (p0ENew.Length() != 0)
         {
             throw new InvalidOperationException("Could not align p0 to x-axis");
         }
 
-        var p1e = disk.GetPoint(p1);
+        var p1E = disk.GetPoint(p1);
 
-        double angle = Math.Atan2(p1e.Y, p1e.X);
+        double angle = Math.Atan2(p1E.Y, p1E.X);
         disk.PoincareRotate(-(float)angle);
 
-        p0e = disk.GetPoint(p0);
-        if (p0e.Length() != 0)
+        p0E = disk.GetPoint(p0);
+        if (p0E.Length() != 0)
         {
             throw new InvalidOperationException();
         }
 
-        p1e = disk.GetPoint(p1);
-        if (p1e.Y > 10e-5)
+        p1E = disk.GetPoint(p1);
+        if (p1E.Y > 10e-5)
         {
             throw new InvalidOperationException();
         }
@@ -44,7 +43,7 @@ public class Util
 
         var result = disk.AddPoint();
         
-        disk.PoincareTransform = original_trsf;
+        disk.PoincareTransform = originalTrsf;
 
         return result;
     }
@@ -54,38 +53,36 @@ public class EdgeTransform
 {
     public enum Type
     {
-        ROTATION,
-        MIRROR
+        Rotation,
+        Mirror
     }
 
-    private Type type;
+    private readonly Type _type;
 
     public EdgeTransform(Type type)
     {
-        this.type = type;
+        _type = type;
     }
 
-    public Polygon generate(PolygonEdge polygonEdge, Disk disk)
+    public Polygon Generate(PolygonEdge polygonEdge, Disk disk)
     {
-        if (this.type == Type.MIRROR)
+        if (_type == Type.Mirror)
         {
             return generate_mirror(polygonEdge, disk);
         }
-        else
-        {
-            throw new InvalidOperationException();
-        }
+
+        throw new InvalidOperationException();
     }
 
     private Polygon generate_mirror(PolygonEdge polygonEdge, Disk disk)
     {
-        var p0 = polygonEdge.p0;
-        var p1 = polygonEdge.p1;
+        var p0 = polygonEdge.P0;
+        var p1 = polygonEdge.P1;
         var points = (p0, p1);
-        var polygon_edges = polygonEdge.polygon.edges.ToList();
-        var offset_index = polygon_edges.IndexOf(polygonEdge);
+        var polygonEdges = polygonEdge.Polygon.edges.ToList();
+        var offsetIndex = polygonEdges.IndexOf(polygonEdge);
 
-        if (offset_index == -1)
+        if (offsetIndex == -1)
         {
             throw new InvalidOperationException();
         }
@@ -93,46 +90,32 @@ public class EdgeTransform
         var edges = new List<PolygonEdge>();
         int count = 0;
 
-        for (int i = 0; i < polygon_edges.Count; i++)
+        for (int i = 0; i < polygonEdges.Count; i++)
         {
-            var edge = polygon_edges[(offset_index + i) % polygon_edges.Count];
+            var edge = polygonEdges[(offsetIndex + i) % polygonEdges.Count];
 
-            if ((edge.p0 == points.p0 || edge.p0 == points.p1) && 
-                (edge.p1 == points.p0 || edge.p1 == points.p1))
+            if ((edge.P0 == points.p0 || edge.P0 == points.p1) && 
+                (edge.P1 == points.p0 || edge.P1 == points.p1))
             {
                 edges.Add(new PolygonEdge(
-                    edge.p0, 
-                    edge.p1, 
+                    edge.P0, 
+                    edge.P1, 
                     true, 
-                    edge.transforms));
+                    edge.Transforms));
             }
             else
             {
-                String m_p0;
-                if (count == 0)
-                {
-                    m_p0 = polygonEdge.p0;
-                }
-                else
-                {
-                    m_p0 = edges.Last().p1;
-                }
+                var mP0 = count == 0 ? polygonEdge.P0 : edges.Last().P1;
 
-                String m_p1;
-                if (count == polygon_edges.Count - 1)
-                {
-                    m_p1 = polygonEdge.p0;
-                }
-                else
-                {
-                    m_p1 = Util.create_mirrored_point(disk, edge.p1, p0, p1);
-                }
+                var mP1 = count == polygonEdges.Count - 1 ? 
+                    polygonEdge.P0 : 
+                    Util.create_mirrored_point(disk, edge.P1, p0, p1);
                 
                 edges.Add(new PolygonEdge(
-                    m_p0,
-                    m_p1,
+                    mP0,
+                    mP1,
                     false,
-                    edge.transforms.ToList()));
+                    edge.Transforms.ToList()));
             }
 
             count++;
@@ -144,47 +127,33 @@ public class EdgeTransform
 
 public class PolygonEdge
 {
-    private String _p0;
-    private String _p1;
-    private bool _isRedundant;
-    private Polygon _polygon = null;
+    private Polygon _polygon;
+    
     private List<EdgeTransform> _transforms;
 
-    public String p0
-    {
-        get { return _p0; }
-    }
-    
-    public String p1
-    {
-        get { return _p1; }
-    }
+    public string P0 { get; }
 
-    public List<EdgeTransform> transforms
-    {
-        get { return _transforms.ToList(); }
-    }
+    public string P1 { get; }
 
-    public bool isRedundant
-    {
-        get { return _isRedundant; }
-    }
+    public List<EdgeTransform> Transforms => _transforms.ToList();
+
+    public bool IsRedundant { get; }
 
     public PolygonEdge(string p0, string p1, bool isRedundant, List<EdgeTransform> transforms)
     {
-        _p0 = p0;
-        _p1 = p1;
+        P0 = p0;
+        P1 = p1;
 
         if (p0 == p1)
         {
             throw new InvalidOperationException();
         }
         
-        _isRedundant = isRedundant;
+        IsRedundant = isRedundant;
         _transforms = transforms;
     }
 
-    public Polygon polygon
+    public Polygon Polygon
     {
         get
         {
@@ -206,9 +175,9 @@ public class PolygonEdge
         }
     }
     
-    public bool isConnectedTo(PolygonEdge other)
+    public bool IsConnectedTo(PolygonEdge other)
     {
-        return _p1.Equals(other._p0);
+        return P1.Equals(other.P0);
     }
 }
 
@@ -222,7 +191,7 @@ public class Polygon
 
         foreach (var e in edges)
         {
-            e.polygon = this;
+            e.Polygon = this;
         }
 
         for (int i = 0; i < edges.Count; i++)
@@ -230,9 +199,9 @@ public class Polygon
             var e0 = edges[i];
             var e1 = edges[(i + 1) % edges.Count];
 
-            if (!e0.isConnectedTo(e1))
+            if (!e0.IsConnectedTo(e1))
             {
-                 throw new InvalidOperationException("Edges are not contiguous.");
+                throw new InvalidOperationException("Edges are not contiguous.");
             }
         }
     }
@@ -249,7 +218,7 @@ public class EdgeGenerator
         this.disk = disk;
     }
 
-    public void createEdge(String p0, String p1)
+    public void CreateEdge(String p0, String p1)
     {
         var key = new Tuple<string, string>(p0, p1);
         var keyInv = new Tuple<string, string>(p1, p0);
@@ -269,58 +238,53 @@ class SpanningTreeNode
 {
     private SpanningTreeNode _parent = null;
     private List<SpanningTreeNode> childNodes = new();
-    private PolygonEdge _polygonEdge;
 
     public SpanningTreeNode parent
     {
-        set { _parent = value; }
+        set => _parent = value;
     }
     
     public SpanningTreeNode(PolygonEdge polygonEdge)
     {
-        _polygonEdge = polygonEdge;
+        this.PolygonEdge = polygonEdge;
     }
 
-    public PolygonEdge polygonEdge
-    {
-        get
-        {
-            return _polygonEdge;
-        }
-    }
+    public PolygonEdge PolygonEdge { get; }
 
-    public IEnumerable<SpanningTreeNode> walk()
+    public IEnumerable<SpanningTreeNode> Walk()
     {
         yield return this;
         
         foreach (var n in childNodes)
         {
-            foreach (var nn in n.walk())
+            foreach (var nn in n.Walk())
             {
                 yield return nn;
             }
         }
     }
 
-    public void generate(Disk disk, int depth)
+    public void Generate(Disk disk, int depth)
     {
-        if (depth == 0 || _polygonEdge.isRedundant)
+        if (depth == 0 || PolygonEdge.IsRedundant)
+        {
+            return;
+        }
+
+        if (childNodes.Count != 0)
         {
             return;
         }
         
-        if (childNodes.Count == 0)
+        foreach (var t in PolygonEdge.Transforms)
         {
-            foreach (var t in _polygonEdge.transforms)
+            var childPolygon = t.Generate(PolygonEdge, disk);
+            foreach (var edge in childPolygon.edges)
             {
-                var childPolygon = t.generate(_polygonEdge, disk);
-                foreach (var edge in childPolygon.edges)
-                {
-                    var node = new SpanningTreeNode(edge);
-                    node.parent = this;
-                    node.generate(disk, depth - 1);
-                    childNodes.Add(node);
-                }
+                var node = new SpanningTreeNode(edge);
+                node.parent = this;
+                node.Generate(disk, depth - 1);
+                childNodes.Add(node);
             }
         }
 
@@ -328,16 +292,16 @@ class SpanningTreeNode
 }
 
 
-public class Tiling
+public static class Tiling
 {
 
-    public class Tiling_3_7
+    public static class Tiling_3_7
     {
-        public static void generate(Disk disk, int depth)
+        public static void Generate(Disk disk, int depth)
         {
-            if (depth < 0)
+            if (depth <= 0)
             {
-                throw new ArgumentException();
+                throw new ArgumentException("Depth must be > 0");
             }
             
             var n = 4;
@@ -355,7 +319,7 @@ public class Tiling
 
             var points = new List<String>();
 
-            for (int i = 0; i < n; i++)
+            for (var i = 0; i < n; i++)
             {
                 var angle = Math.PI * 2 * i / n;
                 var trsf = disk.PoincareTransform;
@@ -367,7 +331,7 @@ public class Tiling
                 disk.PoincareTransform = trsf;
             }
 
-            var root_shape = new Polygon(
+            var rootShape = new Polygon(
                 new List<PolygonEdge>()
                 {
                     new(
@@ -376,7 +340,7 @@ public class Tiling
                         false,
                         new List<EdgeTransform>
                         {
-                            new(EdgeTransform.Type.MIRROR)
+                            new(EdgeTransform.Type.Mirror)
                         }),
                     new(
                         points[1],
@@ -384,7 +348,7 @@ public class Tiling
                         false,
                         new List<EdgeTransform>
                         {
-                            new(EdgeTransform.Type.MIRROR)
+                            new(EdgeTransform.Type.Mirror)
                         }),
                     new(
                         points[2],
@@ -392,7 +356,7 @@ public class Tiling
                         false,
                         new List<EdgeTransform>
                         {
-                            new(EdgeTransform.Type.MIRROR)
+                            new(EdgeTransform.Type.Mirror)
                         }),
                     new(
                         points[3],
@@ -400,26 +364,26 @@ public class Tiling
                         false,
                         new List<EdgeTransform>
                         {
-                            new(EdgeTransform.Type.MIRROR)
+                            new(EdgeTransform.Type.Mirror)
                         })
                 });
 
             var edgeGenerator = new EdgeGenerator(disk);
             var tree = new List<SpanningTreeNode>();
-            foreach (var e in root_shape.edges)
+            foreach (var e in rootShape.edges)
             {
-                var tree_root = new SpanningTreeNode(e);
-                tree.Add(tree_root);
+                var treeRoot = new SpanningTreeNode(e);
+                tree.Add(treeRoot);
             }
 
             foreach (var t in tree)
             {
-                t.generate(disk, depth);
+                t.Generate(disk, depth);
 
-                var subnodes = t.walk().ToList();
+                var subnodes = t.Walk().ToList();
                 foreach (var subNode in subnodes)
                 {
-                    edgeGenerator.createEdge(subNode.polygonEdge.p0, subNode.polygonEdge.p1);
+                    edgeGenerator.CreateEdge(subNode.PolygonEdge.P0, subNode.PolygonEdge.P1);
                 }
             }
         }
