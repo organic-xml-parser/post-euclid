@@ -96,7 +96,7 @@ class PoincareModelPoint(euclidean_2d.entities.Point, PoincareModelEntity):
     def xy(self):
         return self.x, self.y
 
-    def euclidean_representation(self) -> euclidean_2d.entities.Euclidean2D:
+    def get_euclidean_representation(self) -> euclidean_2d.entities.Euclidean2D:
         return self
 
     def apply_transform(self, model_transfrom: T_Transform):

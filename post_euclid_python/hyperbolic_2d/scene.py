@@ -62,7 +62,14 @@ class Scene:
         self._points: typing.Dict[str, HyperbolicModelEntity] = {}
         self._scene_items: typing.List[SceneItem] = []
         self._model = model
+        self._transform_old = None
         self._transform = self._model.get_transform_tool().create_identity()
+
+    def __enter__(self):
+        self._transform_old = copy(self._transform)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._transform = self._transform_old
 
     @property
     def model(self) -> HyperbolicModel:
@@ -76,17 +83,19 @@ class Scene:
         self._transform = self._model.get_transform_tool().gyro_mult(
             self._model.get_transform_tool().create_rotation_like(angle), self._transform)
 
-    def add_scene_item(self, poincare_scene_item: SceneItem):
-        if any(k not in self._points for k in poincare_scene_item.keys):
+    def add_scene_item(self, scene_item: SceneItem):
+        if any(k not in self._points for k in scene_item.keys):
             raise ValueError("Scene item references points outside the scene")
 
-        self._scene_items.append(poincare_scene_item)
+        self._scene_items.append(scene_item)
 
     def get_renderable_entities(self) -> typing.Iterator[euclidean_2d.entities.Euclidean2D]:
         for item in self._scene_items:
             geom = item.get_concrete_geometry(self)
-            geom.apply_transform(self._transform)
             yield geom.get_euclidean_representation()
+
+        #for s in self._points.keys():
+        #    yield self.point_value(s).get_euclidean_representation()
 
     def create_point_reference(self) -> str:
         key = str(uuid.uuid4())
@@ -100,15 +109,17 @@ class Scene:
 
         return key
 
-    def point_reference(self, key: str) -> HyperbolicModelEntity:
-        return self._points[key]
+    def modify_underlying_point(self, key: str, modifier: typing.Callable[[HyperbolicModelEntity], None]):
+        """
+        Modify the point before any scene transform is applied.
+        """
+        modifier(self._points[key])
 
     def point_value(self, key: str) -> HyperbolicModelEntity:
-        return copy(self._points[key])
-
-    def underlying_point_coordinates(self, key: str) -> HyperbolicModelEntity:
         """
-        :return: the point coordinate as stored, with no transform applied to it
+        Perform the scene geometry transform and return the point value.
         """
+        point = copy(self._points[key])
+        point.apply_transform(self._transform)
+        return point
 
-        return self._points[key]

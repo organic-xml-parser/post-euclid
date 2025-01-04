@@ -30,6 +30,10 @@ class WeierstrassModelTransformTool(HyperbolicModelTransformTool[T_Transform]):
         angle = math.atan2(dy, dz)
         dr = math.hypot(dy, dz)
 
+        # convert the dr value back from poincare disk coordinates to underlying coordinates
+        x = (dr * dr + 1) / (1 - dr * dr)
+        dr = math.sqrt(x * x - 1)
+
         a = self.create_rotation_like(angle)
 
         b = numpy.array([

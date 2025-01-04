@@ -1,0 +1,28 @@
+[gd_scene load_steps=7 format=3 uid="uid://fu6dqjhv036b"]
+
+[ext_resource type="Shader" path="res://poincare/noop.gdshader" id="1_e3aiu"]
+[ext_resource type="Texture2D" uid="uid://c301848f5x5pg" path="res://icon.svg" id="2_5wsr4"]
+[ext_resource type="Script" path="res://poincare/Disk.cs" id="3_8d86g"]
+[ext_resource type="Shader" path="res://poincare/unit_disk.gdshader" id="4_stlfy"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_60snw"]
+shader = ExtResource("1_e3aiu")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7t38n"]
+shader = ExtResource("4_stlfy")
+
+[node name="post_euclid_2d" type="Node2D"]
+
+[node name="poincare" type="Node2D" parent="."]
+
+[node name="disk" type="Sprite2D" parent="poincare"]
+material = SubResource("ShaderMaterial_60snw")
+position = Vector2(229.5, 230.5)
+scale = Vector2(3.58594, 3.58594)
+texture = ExtResource("2_5wsr4")
+script = ExtResource("3_8d86g")
+
+[node name="bg" type="Sprite2D" parent="poincare/disk"]
+z_index = -3
+material = SubResource("ShaderMaterial_7t38n")
+texture = ExtResource("2_5wsr4")

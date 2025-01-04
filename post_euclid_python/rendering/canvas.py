@@ -1,4 +1,5 @@
 import math
+import typing
 
 import pyglet
 
@@ -73,8 +74,9 @@ class Canvas:
         radius = circle_arc.circle.radius * self.scale
         arc_length = delta_angle * radius
 
-        segments = int(max(3.0, arc_length / 5))
+        segments = 8
         segments = int(max(float(segments), 4.0 * delta_angle / math.pi))
+        segments = int(max(3.0, min(float(segments), arc_length / 5)))
 
         return pyglet.shapes.Arc(*self._to_render_coords(*circle_arc.circle.center),
                           radius=radius,
@@ -99,7 +101,7 @@ class Canvas:
     def draw_point(self, point: euclidean_2d.entities.Point, *args, **kwargs):
         return pyglet.shapes.Circle(*self._to_render_coords(*point),
                               radius=5,
-                              color=(50, 50, 0),
+                              color=(50, 50, 250),
                               *args,
                               **kwargs)
 
