@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
-namespace PostEuclid.poincare.tiling_2;
+namespace PostEuclid.poincare.tiling;
 
 
 public static class PolygonCompleter

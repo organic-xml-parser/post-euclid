@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace PostEuclid.poincare.tiling_2;
+namespace PostEuclid.poincare.tiling;
 
 
 public class Edge : Tuple<string, string>

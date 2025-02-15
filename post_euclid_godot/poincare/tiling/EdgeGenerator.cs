@@ -4,7 +4,7 @@ using System.Linq;
 using Godot;
 using Microsoft.VisualBasic.CompilerServices;
 
-namespace PostEuclid.poincare.tiling_2;
+namespace PostEuclid.poincare.tiling;
 
 public static class Extensions
 {

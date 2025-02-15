@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using PostEuclid.poincare.tiling_2;
+using PostEuclid.poincare.tiling;
 
 namespace PostEuclid.poincare;
 

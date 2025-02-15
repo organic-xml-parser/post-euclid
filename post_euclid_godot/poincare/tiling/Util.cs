@@ -6,6 +6,28 @@ namespace PostEuclid.poincare.tiling;
 
 public static class Util
 {
+    public static double NormalizeAngle(double angle)
+    {
+        if (angle < 0)
+        {
+            return 2.0 * Math.PI + angle;
+        }
+
+        return angle;
+    }
+
+    public static bool Clockwise(params Vector2[] vectors)
+    {
+        double sum = 0;
+        for (int i = 0; i < vectors.Length; i++)
+        {
+            var ip = (i + 1) % vectors.Length;
+            sum += (vectors[ip].X - vectors[i].X) * (vectors[ip].Y + vectors[i].Y);
+        }
+
+        return sum > 0;
+    }
+    
     public static string CreateRotatedPoint(Disk disk, string point, string origin, float angle)
     {
         var trsf = disk.PoincareTransform;
@@ -44,7 +66,7 @@ public static class Util
         disk.PoincareTranslate(-p0E.X, -p0E.Y);
 
         var p0ENew = disk.GetPointPosition(p0);
-        if (p0ENew.Length() != 0)
+        if (p0ENew.Length() > 10E-8)
         {
             throw new InvalidOperationException("Could not align p0 to x-axis");
         }
@@ -55,7 +77,7 @@ public static class Util
         disk.PoincareRotate(-(float)angle);
 
         p0E = disk.GetPointPosition(p0);
-        if (p0E.Length() != 0)
+        if (p0E.Length() > 10E-8)
         {
             throw new InvalidOperationException();
         }
