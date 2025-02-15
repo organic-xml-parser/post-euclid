@@ -17,8 +17,8 @@ shader = ExtResource("4_stlfy")
 
 [node name="disk" type="Sprite2D" parent="poincare"]
 material = SubResource("ShaderMaterial_60snw")
-position = Vector2(229.5, 230.5)
-scale = Vector2(3.58594, 3.58594)
+position = Vector2(202.5, 203.5)
+scale = Vector2(3.16406, 3.16406)
 texture = ExtResource("2_5wsr4")
 script = ExtResource("3_8d86g")
 

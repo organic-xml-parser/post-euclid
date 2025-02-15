@@ -277,7 +277,7 @@ class Tiling_3_7:
 
         tree = [SpanningTreeNode(None, e) for e in root_shape.edges]
         for t in tree:
-            t.generate(self._scene, 4)
+            t.generate(self._scene, 2)
             t.walk(lambda node: se.create_edge_scene_item(node.polygon_edge.p0, node.polygon_edge.p1))
 
         for i in scene_items:

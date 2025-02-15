@@ -5,15 +5,29 @@
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_w47if"]
 shader = ExtResource("1_yqal2")
-shader_parameter/mb_a = Vector2(1, 0)
-shader_parameter/mb_b = Vector2(0, 0)
-shader_parameter/mb_c = Vector2(0, 0)
-shader_parameter/mb_d = Vector2(1, 0)
-shader_parameter/base_color = Vector3(1, 0.5, 0.5)
-shader_parameter/p0 = Vector2(-0.185, -0.62)
-shader_parameter/p1 = Vector2(-0.535, -0.61)
-shader_parameter/line_thickness = 0.01
+shader_parameter/elements_in_batch = 0
+shader_parameter/line_thickness = null
+shader_parameter/base_color = null
+shader_parameter/local_p0 = null
+shader_parameter/local_p1 = null
+shader_parameter/edgeIndices = null
+shader_parameter/timeOffset = null
 
 [node name="edge" type="Sprite2D"]
 material = SubResource("ShaderMaterial_w47if")
+texture = ExtResource("2_5wo1l")
+
+[node name="edge_label" type="Node2D" parent="."]
+
+[node name="edge_label" type="Label" parent="edge_label"]
+offset_left = -8.0
+offset_top = -11.0
+offset_right = 7.0
+offset_bottom = 12.0
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Sprite2D" type="Sprite2D" parent="edge_label"]
+visible = false
+scale = Vector2(0.150391, 0.136533)
 texture = ExtResource("2_5wo1l")

@@ -10,9 +10,9 @@ void fragment() {
 	float center_dist = length(UV - center) * 2.0;
 	
 	if (center_dist <= 1.0) {
-		COLOR = vec4(0.5, 0.5, 0.5, 1.0);
+		COLOR = vec4(0.0, 0.0, 0.0, 1.0);
 	} else {
-		COLOR = vec4(0.0, 0.0, 0.0, 0.0);
+		COLOR = vec4(0.0, 0.0, 0.0, 1.0);
 	}
 }
 
