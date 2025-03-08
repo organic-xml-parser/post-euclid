@@ -10,7 +10,7 @@ namespace PostEuclid.poincare.tiling;
 /**
  * Major source for understanding hyperbolic tiling:
  *      GENERATING HYPERBOLIC PATTERNS FOR REGULAR AND NON-REGULAR P-GONS, Ajit V. Datar
- * General idea:
+ * General idea (my approach differs a bit from the paper):
  * 1) start with core polygon points.
  * 2) mark all "exposed" points (as they are referred to in the Datar paper), or "frontier" as I call them
  * (loosely borrowing the term from https://github.com/Geoplexity/Frontier).
